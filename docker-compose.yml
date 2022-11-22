@@ -1,0 +1,48 @@
+version: '3.9'
+
+services:
+  # Docker image to work with Jenkins
+  dockerd:
+    image: docker:dind
+    container_name: dockerd
+    privileged: true
+    volumes:
+      - ./jenkins-certs:/certs/ca
+      - ./jenkins-certs:/certs/client
+      - ./jenkins-data:/var/jenkins_home
+    environment:
+      DOCKER_TLS_CERTDIR: /certs
+    restart: unless-stopped
+    ports:
+      - 2376:2376
+    networks: 
+      - dev-net
+  jenkins:
+    build:
+      context: ./bin/${TAGVERSION}
+    restart: on-failure
+    container_name: '${COMPOSE_PROJECT_NAME}-${TAGVERSION}'
+    environment:
+      DOCKER_HOST: tcp://dockerd:2376
+      DOCKER_CERT_PATH: /certs/client
+      DOCKER_TLS_VERIFY: 1
+    depends_on:
+      - dockerd
+    volumes: 
+      - ./jenkins-data:/var/jenkins_home
+      - ./jenkins-certs:/certs/client:ro
+    ports:
+      # <Port exposed> : <Port running inside container>
+      - '${JENKINS_HTTP_PORT_NUMBER}:8080'
+      - '${JENKINS_JNLP_PORT_NUMBER}:50000'
+    logging:
+      options:
+        max-size: 10m
+        max-file: '3'
+    #user: 1001:1001
+    networks: 
+      - dev-net
+      
+networks:
+  dev-net:
+    external: true

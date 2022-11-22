@@ -1,0 +1,17 @@
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+.env
+
+# exclude auto generate by Jenkins
+jenkins-certs/*
+jenkins-certs/**
+jenkins-data/**
+jenkins-data/**/
+
+# exception to the rule
+# Misc auto generate by Jenkins
+!jenkins-certs/.gitkeep
+!jenkins-data/.gitkeep
+#!jenkins-data/.gitignore
